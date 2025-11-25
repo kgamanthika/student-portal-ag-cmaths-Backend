@@ -21,7 +21,8 @@ router.post("/login", async (req, res) => {
       message: "Login success",
       token,
       role: user.role,
-      studentId: user.studentId
+      studentId: user.studentId,
+      name: user.name
     });
   } catch (err) {
     console.error(err);
