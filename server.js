@@ -26,3 +26,6 @@ app.use("/admin", adminRoutes);
 
 const marksRoutes = require("./routes/marksRoutes");
 app.use("/marks", marksRoutes);
+
+const sysOwnerRouter = require("./routes/systemOwner");
+app.use("/sysOwner", sysOwnerRouter);
