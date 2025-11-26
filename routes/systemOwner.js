@@ -1,0 +1,88 @@
+const express = require("express");
+const Marks = require("../models/Marks");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+
+
+const router = express.Router();
+
+// get all exams
+router.get("/", async (req, res) => {
+  try {
+    const data = await Marks.find();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch exams" });
+  }
+});
+//delete all students
+router.delete("/delete-all-students", async (req, res) => {
+  try {
+    await User.deleteMany({ role: "student" });
+    res.json({ message: "All students deleted successfully" });
+  } catch (err) {console.log(err);
+  
+    res.status(500).json({ message: "Failed to delete all students" });
+  }
+});
+// delete selected exam
+router.delete("/:id", async (req, res) => {
+  console.log(req.params.id);
+
+  try {
+    if (req.params.id == "all") {
+      //delete all exams
+      const deletedExams = await Marks.deleteMany({});
+      console.log("delete all", deletedExams);
+      return res.json({ message: "All exams deleted successfully" });
+    }
+
+    const findExam = await Marks.findById(req.params.id);
+    Exam = findExam.term;
+    subject = findExam.subject;
+
+    //delete all marks related to the exam and subject
+    const deletedExam = await Marks.deleteMany({
+      term: Exam,
+      subject: subject,
+    });
+    console.log("delete", deletedExam);
+
+    if (!deletedExam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+    res.json({ message: "Exam deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete exam" });
+  }
+});
+
+//create system admin
+router.post("/create-system-admin", async (req, res) => {
+  try {
+    const {name, email, password } = req.body;
+
+    // Check if the user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    
+    const hashed = await bcrypt.hash(password, 10);
+    // Create a new system admin user
+    const newAdmin = new User({
+      name,
+      email,
+      password: hashed,
+      role: "admin",
+    });
+
+    await newAdmin.save();
+    res.json({ message: "System Admin created successfully" });
+  } catch (err) {console.log(err);
+  
+    res.status(500).json({ message: "Failed to create System Admin" });
+  }
+});
+
+module.exports = router;
