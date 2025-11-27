@@ -19,10 +19,10 @@ router.get("/", async (req, res) => {
 router.delete("/delete-all-students", async (req, res) => {
   try {
     await User.deleteMany({ role: "student" });
-    res.json({ message: "All students deleted successfully" });
+    res.json({ success: true, message: "All students deleted successfully" });
   } catch (err) {console.log(err);
   
-    res.status(500).json({ message: "Failed to delete all students" });
+    res.status(500).json({ success: false, message: "Failed to delete all students" });
   }
 });
 // delete selected exam
@@ -34,7 +34,7 @@ router.delete("/:id", async (req, res) => {
       //delete all exams
       const deletedExams = await Marks.deleteMany({});
       console.log("delete all", deletedExams);
-      return res.json({ message: "All exams deleted successfully" });
+      return res.json({success: true, message: "All exams deleted successfully" });
     }
 
     const findExam = await Marks.findById(req.params.id);
@@ -49,18 +49,18 @@ router.delete("/:id", async (req, res) => {
     console.log("delete", deletedExam);
 
     if (!deletedExam) {
-      return res.status(404).json({ message: "Exam not found" });
+      return res.status(404).json({ success: false, message: "Exam not found" });
     }
-    res.json({ message: "Exam deleted successfully" });
+    res.json({success: true, message: "Exam deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Failed to delete exam" });
+    res.status(500).json({ success: false, message: "Failed to delete exam" });
   }
 });
 
 //create system admin
 router.post("/create-system-admin", async (req, res) => {
   try {
-    const {name, email, password } = req.body;
+    const {name, email, password, role } = req.body;
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
@@ -74,7 +74,7 @@ router.post("/create-system-admin", async (req, res) => {
       name,
       email,
       password: hashed,
-      role: "admin",
+      role,
     });
 
     await newAdmin.save();
@@ -82,6 +82,33 @@ router.post("/create-system-admin", async (req, res) => {
   } catch (err) {console.log(err);
   
     res.status(500).json({ success: false,message: "Failed to create System Admin" });
+  }
+});
+
+
+//delete system admin
+router.delete("/delete-system-admin/:id", async (req, res) => {
+  try {
+    const deletedAdmin = await User.findByIdAndDelete(req.params.id);
+    if (!deletedAdmin) {
+      return res.status(404).json({ success: false, message: "System Admin not found" });
+    }
+    res.json({ success: true, message: "System Admin deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to delete System Admin" });
+  }
+});
+
+//get all system admins
+router.get("/get-all-system-admins", async (req, res) => {
+  try {
+   const admins = await User.find({ role: { $in: ["admin", "system-owner"] } });
+console.log(admins);
+
+    
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch system admins" });
   }
 });
 
