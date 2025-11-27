@@ -65,7 +65,7 @@ router.post("/create-system-admin", async (req, res) => {
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ success: false,message: "User already exists" });
     }
     
     const hashed = await bcrypt.hash(password, 10);
@@ -78,10 +78,10 @@ router.post("/create-system-admin", async (req, res) => {
     });
 
     await newAdmin.save();
-    res.json({ message: "System Admin created successfully" });
+    res.json({ success: true,message: "System Admin created successfully" });
   } catch (err) {console.log(err);
   
-    res.status(500).json({ message: "Failed to create System Admin" });
+    res.status(500).json({ success: false,message: "Failed to create System Admin" });
   }
 });
 
