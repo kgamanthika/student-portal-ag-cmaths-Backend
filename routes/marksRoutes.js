@@ -1,10 +1,14 @@
 const express = require("express");
 const Marks = require("../models/Marks");
+const verifyToken = require("../middleware/auth");
 
 const router = express.Router();
 
 // Add marks
-router.post("/add", async (req, res) => {
+router.post("/add", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     const mark = new Marks(req.body);
     await mark.save();
@@ -15,7 +19,10 @@ router.post("/add", async (req, res) => {
 });
 
 // Get all marks (optional: for admin view)
-router.get("/", async (req, res) => {
+router.get("/",verifyToken, async (req, res) => {
+  if (!["admin", "system-owner","student"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     const data = await Marks.find();
     res.json(data);
@@ -25,7 +32,10 @@ router.get("/", async (req, res) => {
 });
 
 // Get marks by studentId
-router.get("/:studentId", async (req, res) => {
+router.get("/:studentId",verifyToken, async (req, res) => {
+  if (!["admin", "system-owner","student"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     const data = await Marks.find({ studentId: req.params.studentId });
     res.json(data);
@@ -35,7 +45,10 @@ router.get("/:studentId", async (req, res) => {
 });
 
 // Delete a mark by _id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     await Marks.findByIdAndDelete(req.params.id);
     res.json({ message: "Mark deleted", success: true });
@@ -45,7 +58,10 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Update a mark by _id
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     const updatedMark = await Marks.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ message: "Mark updated", success: true, data: updatedMark });
@@ -55,7 +71,10 @@ router.put("/:id", async (req, res) => {
 });
 
 // student details by ID
-router.get("/student/:id", async (req, res) => {
+router.get("/student/:id",verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   try {
     const student = await Student.findById(req.params.id);
     res.json(student);

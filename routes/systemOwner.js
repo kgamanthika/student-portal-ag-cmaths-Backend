@@ -2,12 +2,16 @@ const express = require("express");
 const Marks = require("../models/Marks");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const verifyToken = require("../middleware/auth");
 
 
 const router = express.Router();
 
 // get all exams
-router.get("/", async (req, res) => {
+router.get("/",verifyToken, async (req, res) => {
+  if (!["admin", "system-owner","student"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
     const data = await Marks.find();
     res.json(data);
@@ -16,7 +20,10 @@ router.get("/", async (req, res) => {
   }
 });
 //delete all students
-router.delete("/delete-all-students", async (req, res) => {
+router.delete("/delete-all-students", verifyToken, async (req, res) => {
+  if (!["system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
     await User.deleteMany({ role: "student" });
     await Marks.deleteMany();
@@ -27,8 +34,11 @@ router.delete("/delete-all-students", async (req, res) => {
   }
 });
 // delete selected exam
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",verifyToken, async (req, res) => {
 
+  if (!["system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
     if (req.params.id == "all") {
       //delete all exams
@@ -56,7 +66,10 @@ router.delete("/:id", async (req, res) => {
 });
 
 //create system admin
-router.post("/create-system-admin", async (req, res) => {
+router.post("/create-system-admin",verifyToken, async (req, res) => {
+  if (!["system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
     const {name, email, password, role } = req.body;
 
@@ -85,7 +98,10 @@ router.post("/create-system-admin", async (req, res) => {
 
 
 //delete system admin
-router.delete("/delete-system-admin/:id", async (req, res) => {
+router.delete("/delete-system-admin/:id",verifyToken, async (req, res) => {
+  if (!["system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
     const deletedAdmin = await User.findByIdAndDelete(req.params.id);
     if (!deletedAdmin) {
@@ -98,7 +114,10 @@ router.delete("/delete-system-admin/:id", async (req, res) => {
 });
 
 //get all system admins
-router.get("/get-all-system-admins", async (req, res) => {
+router.get("/get-all-system-admins",verifyToken, async (req, res) => {
+  if (!["system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
   try {
    const admins = await User.find({ role: { $in: ["admin", "system-owner"] } });
 
