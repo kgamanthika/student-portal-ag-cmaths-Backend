@@ -1,11 +1,15 @@
 const express = require("express");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const verifyToken = require("../middleware/auth");
 
 const router = express.Router();
 
 // Add Student
-router.post("/add-student", async (req, res) => {
+router.post("/add-student", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   try {
     const { name, email, password, studentId, mode } = req.body;
 
@@ -14,7 +18,7 @@ router.post("/add-student", async (req, res) => {
     if (existingEmail) {
       return res.status(400).json({
         success: false,
-        message: "Email already exists"
+        message: "Email already exists",
       });
     }
 
@@ -23,7 +27,7 @@ router.post("/add-student", async (req, res) => {
     if (existingStudentId) {
       return res.status(400).json({
         success: false,
-        message: "Student ID already exists"
+        message: "Student ID already exists",
       });
     }
 
@@ -40,7 +44,6 @@ router.post("/add-student", async (req, res) => {
 
     await user.save();
     res.json({ success: true, message: "Student added" });
-
   } catch (error) {
     console.error("Add Student Error:", error);
 
@@ -49,40 +52,48 @@ router.post("/add-student", async (req, res) => {
       if (error.keyPattern.email) {
         return res.status(400).json({
           success: false,
-          message: "Email already exists"
+          message: "Email already exists",
         });
       }
       if (error.keyPattern.studentId) {
         return res.status(400).json({
           success: false,
-          message: "Student ID already exists"
+          message: "Student ID already exists",
         });
       }
     }
 
     res.status(500).json({
       success: false,
-      message: "Server Error"
+      message: "Server Error",
     });
   }
 });
 
 // Get all students
-router.get("/students", async (req, res) => {
+router.get("/students", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner","student"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   const students = await User.find({ role: "student" });
   res.json(students);
 });
 
 // Delete Student
-router.delete("/student/:id", async (req, res) => {
+router.delete("/student/:id", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: "Student deleted" });
 });
 
-
 // Update Student
 // Update Student (including optional password)
-router.put("/student/:id", async (req, res) => {
+router.put("/student/:id", verifyToken, async (req, res) => {
+  if (!["admin", "system-owner"].includes(req.user.role)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
   try {
     const { name, email, studentId, mode, password } = req.body;
 
@@ -94,25 +105,22 @@ router.put("/student/:id", async (req, res) => {
       updateData.password = hashed;
     }
 
-    const updated = await User.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
+    const updated = await User.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
 
     if (!updated) {
       return res.status(404).json({
         success: false,
-        message: "Student not found"
+        message: "Student not found",
       });
     }
 
     res.json({
       success: true,
       message: "Student updated",
-      student: updated
+      student: updated,
     });
-
   } catch (error) {
     console.error("Update Student Error:", error);
 
@@ -120,24 +128,22 @@ router.put("/student/:id", async (req, res) => {
       if (error.keyPattern.email) {
         return res.status(400).json({
           success: false,
-          message: "Email already exists"
+          message: "Email already exists",
         });
       }
       if (error.keyPattern.studentId) {
         return res.status(400).json({
           success: false,
-          message: "Student ID already exists"
+          message: "Student ID already exists",
         });
       }
     }
 
     res.status(500).json({
       success: false,
-      message: "Server Error"
+      message: "Server Error",
     });
   }
 });
-
-
 
 module.exports = router;

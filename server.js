@@ -9,10 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect MongoDB Atlas
+// Connect MongoDB
+require('dotenv').config();
+
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.log("❌ MongoDB Connection Error:", err));
+.then(() => console.log("MongoDB Connected"))
+.catch((err) => console.error("MongoDB connection error:", err));
+
+// mongoose.connect("mongodb://127.0.0.1:27017/studentPortal")
+//   .then(() => console.log("MongoDB Connected"))
+//   .catch((err) => console.log(err));
 
 // Routes
 app.get("/", (req, res) => {
