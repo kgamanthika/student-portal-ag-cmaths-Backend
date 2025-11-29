@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const dotenv = require("dotenv");
+
+dotenv.config(); // load .env
 
 const app = express();
 app.use(cors());
@@ -22,8 +25,6 @@ app.get("/", (req, res) => {
   res.send("Backend running...");
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
-
 const authRoutes = require("./routes/authRoutes");
 app.use("/auth", authRoutes);
 
@@ -35,3 +36,7 @@ app.use("/marks", marksRoutes);
 
 const sysOwnerRouter = require("./routes/systemOwner");
 app.use("/sysOwner", sysOwnerRouter);
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
