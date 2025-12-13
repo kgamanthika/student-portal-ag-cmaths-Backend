@@ -37,6 +37,65 @@ app.use("/marks", marksRoutes);
 const sysOwnerRouter = require("./routes/systemOwner");
 app.use("/sysOwner", sysOwnerRouter);
 
+const examRoutes = require("./routes/exams/create-exam");
+app.use("/create-exam", examRoutes);
+
+const deleteSelectedExamRoutes = require("./routes/exams/delete-selected-exam");
+app.use("/delete-selected-exam", deleteSelectedExamRoutes);
+
+const getAllExamsRoutes = require("./routes/exams/get-all-exams");
+app.use("/get-all-exams", getAllExamsRoutes);
+
+app.use("/uploads", express.static("uploads"));
+
+const classRoutes = require("./routes/classes/create-class");
+app.use("/create-class", classRoutes);
+
+const deleteClassRoutes = require("./routes/classes/delete-class");
+app.use("/delete-class", deleteClassRoutes);
+
+const updateClassRoutes = require("./routes/classes/update-class");
+app.use("/update-class", updateClassRoutes);
+
+const classDetailsRoutes = require("./routes/classes/class-details");
+app.use("/class-details", classDetailsRoutes);
+
+const createLessonRoutes = require("./routes/lessons/create-lesson");
+app.use("/create-lesson", createLessonRoutes);
+
+const getLessonsRoutes = require("./routes/lessons/get-lessons");
+app.use("/get-lessons", getLessonsRoutes);
+
+const addRecordingRoutes = require("./routes/recordings/add-recording");
+app.use("/lessons", addRecordingRoutes);
+
+const deleteRecordingRoutes = require("./routes/recordings/delete-recording");
+app.use("/delete-recording", deleteRecordingRoutes);
+
+const getStudentClassesRoutes = require("./routes/students/get-student-classes");
+app.use("/get-student-classes", getStudentClassesRoutes);
+
+const getAllClassesRoutes = require("./routes/classes/get-all-classes");
+app.use("/get-all-classes", getAllClassesRoutes);
+
+const deleteLessonRoutes = require("./routes/lessons/delete-lesson");
+app.use("/delete-lesson", deleteLessonRoutes);
+
+const updateLessonRoutes = require("./routes/lessons/update-lesson");
+app.use("/update-lesson", updateLessonRoutes);
+
+const addAssignmentRoutes = require("./routes/assignments/add-assignment");
+app.use("/add-assignment", addAssignmentRoutes);
+
+const deleteAssignmentRoutes = require("./routes/assignments/delete-assignment");
+app.use("/delete-assignment", deleteAssignmentRoutes);
+
+const getStudentExamsRoutes = require("./routes/students/get-student-exams");
+app.use("/get-student-exams", getStudentExamsRoutes);
+
+const submitExamPaperRoutes = require("./routes/students/submit-exam-paper");
+app.use("/submit-exam-paper", submitExamPaperRoutes);
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

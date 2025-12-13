@@ -11,7 +11,7 @@ router.post("/add-student", verifyToken, async (req, res) => {
     return res.status(403).json({ error: "Forbidden" });
   }
   try {
-    const { name, email, password, studentId, mode } = req.body;
+    const { name, email, password, studentId, studentClass, mode } = req.body;
 
     // Check if email already exists
     const existingEmail = await User.findOne({ email });
@@ -39,6 +39,7 @@ router.post("/add-student", verifyToken, async (req, res) => {
       password: hashed,
       role: "student",
       studentId,
+      studentClass,
       mode,
     });
 
@@ -95,9 +96,9 @@ router.put("/student/:id", verifyToken, async (req, res) => {
     return res.status(403).json({ error: "Forbidden" });
   }
   try {
-    const { name, email, studentId, mode, password } = req.body;
+    const { name, email, studentId, studentClass, mode, password, } = req.body;
 
-    const updateData = { name, email, studentId, mode };
+    const updateData = { name, email, studentId, studentClass, mode };
 
     // If password is provided, hash it
     if (password && password.trim() !== "") {
