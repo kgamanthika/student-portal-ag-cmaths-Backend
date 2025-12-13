@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     enum: ["Online", "Physical"],
     required: false,
   },
+  studentClass:{
+    type: [String],
+    required: false,
+  }
 });
 
 module.exports = mongoose.model("User", userSchema);
