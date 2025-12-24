@@ -16,7 +16,6 @@ const SubmitExam = require("../models/SubmitExam");
 // Helper: Clear all files inside a folder and its subfolders, but keep folders
 const clearFolderFiles = (folderPath) => {
   if (!fs.existsSync(folderPath)) {
-    console.log("Folder does not exist:", folderPath);
     return;
   }
 
@@ -30,7 +29,6 @@ const clearFolderFiles = (folderPath) => {
       // Do NOT remove the subfolder itself
     } else {
       fs.unlinkSync(curPath);
-      console.log("Deleted file:", curPath);
     }
   });
 };
@@ -50,7 +48,6 @@ router.delete("/",verifyToken, async (req, res) => {
 
     // 2️⃣ Delete all uploaded exam/assignment files
 const uploadsDir = path.join(__dirname, "..", "uploads");
-console.log("Uploads dir:", uploadsDir);
 
 clearFolderFiles(uploadsDir);
 
