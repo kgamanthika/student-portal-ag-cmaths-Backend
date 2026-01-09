@@ -1,25 +1,56 @@
 const multer = require("multer");
-const path = require("path");
+const cloudinary = require("cloudinary").v2;
 
-// Reusable storage generator
-const createStorage = (folderName) =>
-  multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, `uploads/${folderName}`);
-    },
-    filename: (req, file, cb) => {
-      const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, unique + path.extname(file.originalname));
-    },
-  });
-
-// Separate uploaders for different types
-exports.uploadExam = multer({ storage: createStorage("Exams") });
-// folder for lesson recordings
-exports.uploadLessonRecording = multer({
-  storage: createStorage("LessonRecordings"),
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-// folder for assignment
-exports.uploadAssignment = multer({ storage: createStorage("Assignments") });
-// folder for images
-exports.uploadImage = multer({ storage: createStorage("Images") });
+
+// Use memory storage (not disk)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Reusable uploader
+const uploadToCloudinary = (folderName) => async (req, res, next) => {
+  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+  try {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: folderName, resource_type: "auto" },
+      (error, result) => {
+        if (error) return res.status(500).json(error);
+
+        // save url in request for next controller
+        req.fileUrl = result.secure_url;
+        next();
+      }
+    );
+
+    stream.end(req.file.buffer);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+// Export uploaders (same names as yours)
+exports.uploadExam = [
+  upload.single("file"),
+  uploadToCloudinary("Exams"),
+];
+
+exports.uploadLessonRecording = [
+  upload.single("file"),
+  uploadToCloudinary("LessonRecordings"),
+];
+
+exports.uploadAssignment = [
+  upload.single("file"),
+  uploadToCloudinary("Assignments"),
+];
+
+exports.uploadImage = [
+  upload.single("file"),
+  uploadToCloudinary("Images"),
+];

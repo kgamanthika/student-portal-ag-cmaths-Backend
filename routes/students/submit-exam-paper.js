@@ -3,29 +3,23 @@ const router = express.Router();
 const SubmitExam = require("../../models/SubmitExam");
 const verifyToken = require("../../middleware/auth");
 const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
+const cloudinary = require("cloudinary").v2;
 
 // ------------------------------
-// Folder: uploads/submitted-exams
+// Cloudinary config
 // ------------------------------
-const examUploadFolder = "uploads/submitted-exams";
-
-if (!fs.existsSync(examUploadFolder)) {
-  fs.mkdirSync(examUploadFolder, { recursive: true });
-}
-
-// Multer storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, examUploadFolder);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const upload = multer({ storage });
+// ------------------------------
+// Multer (memory storage)
+// ------------------------------
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 // ------------------------------
 // POST /api/submit-exam
@@ -33,38 +27,61 @@ const upload = multer({ storage });
 router.post("/", verifyToken, upload.single("answerPDF"), async (req, res) => {
   try {
     const { examId } = req.body;
-    const studentId = req.user.id; // from verifyToken
+    const studentId = req.user.id;
 
     if (!req.file) {
-      return res.status(400).json({ success: false, message: "No file uploaded" });
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
     }
 
     // Check if student already submitted
     const existing = await SubmitExam.findOne({ examId, studentId });
     if (existing) {
-      // Optional: delete the newly uploaded file to avoid orphan files
-      fs.unlinkSync(req.file.path);
-
       return res.status(400).json({
         success: false,
         message: "You have already submitted this exam",
       });
     }
 
-    // Save new submission
+    // Upload PDF to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "Submitted-Exams",
+          resource_type: "raw", // important for PDF
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+
+      stream.end(req.file.buffer);
+    });
+
     const newSubmission = new SubmitExam({
       examId,
       studentId,
-      answerPDF: `/uploads/submitted-exams/${req.file.filename}`,
+      answerPDF: uploadResult.secure_url, // ✅ Cloudinary URL
       submittedAt: new Date(),
     });
 
     await newSubmission.save();
 
-    res.json({ success: true, message: "Exam submitted successfully", submission: newSubmission });
+    res.json({
+      success: true,
+      message: "Exam submitted successfully",
+      submission: newSubmission,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("Submit exam error:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 });
+
 module.exports = router;
