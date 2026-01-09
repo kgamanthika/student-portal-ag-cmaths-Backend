@@ -102,6 +102,14 @@ app.use("/get-submitted-exams", getSubmittedExamsRoutes);
 const deleteAllClassesRecordsAndEverythingRoutes = require("./routes/delete-all-classes-records-and-everything");
 app.use("/delete-all-classes-records-and-everything", deleteAllClassesRecordsAndEverythingRoutes);
 
+
+//to auto run back
+// Keep-alive endpoint for Render or UptimeRobot
+app.get("/ping", (req, res) => {
+  console.log("Ping received at", new Date().toISOString());
+  res.send("pong");
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
