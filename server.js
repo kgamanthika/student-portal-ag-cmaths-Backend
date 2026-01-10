@@ -102,6 +102,9 @@ app.use("/get-submitted-exams", getSubmittedExamsRoutes);
 const deleteAllClassesRecordsAndEverythingRoutes = require("./routes/delete-all-classes-records-and-everything");
 app.use("/delete-all-classes-records-and-everything", deleteAllClassesRecordsAndEverythingRoutes);
 
+const startExamRoutes = require("./routes/students/start-exam");
+app.use("/start-exam", startExamRoutes);
+
 
 //to auto run back
 // Keep-alive endpoint for Render or UptimeRobot
