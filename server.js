@@ -115,7 +115,6 @@ app.use("/get-payments", getPaymentsRoutes);
 //to auto run back
 // Keep-alive endpoint for Render or UptimeRobot
 app.get("/ping", (req, res) => {
-  console.log("Ping received at", new Date().toISOString());
   res.send("pong");
 });
 

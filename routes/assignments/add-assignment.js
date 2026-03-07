@@ -36,7 +36,6 @@ router.post("/", verifyToken, upload.single("file"), async (req, res) => {
     let fileUrl = "";
 
     if (req.file) {
-      console.log("File received:", req.file.originalname);
 
       try {
         const uploadResult = await new Promise((resolve, reject) => {
@@ -48,7 +47,6 @@ router.post("/", verifyToken, upload.single("file"), async (req, res) => {
         });
 
         fileUrl = uploadResult.secure_url;
-        console.log("Cloudinary URL:", fileUrl);
       } catch (err) {
         console.error("Cloudinary error:", err);
         return res.status(500).json({ success: false, message: "File upload failed", error: err.message });
