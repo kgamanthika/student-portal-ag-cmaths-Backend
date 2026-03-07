@@ -105,6 +105,12 @@ app.use("/delete-all-classes-records-and-everything", deleteAllClassesRecordsAnd
 const startExamRoutes = require("./routes/students/start-exam");
 app.use("/start-exam", startExamRoutes);
 
+const addPaymentRoutes = require("./routes/payments/add-payment");
+app.use("/add-payment", addPaymentRoutes);
+
+const getPaymentsRoutes = require("./routes/payments/get-payments");
+app.use("/get-payments", getPaymentsRoutes);
+
 
 //to auto run back
 // Keep-alive endpoint for Render or UptimeRobot
