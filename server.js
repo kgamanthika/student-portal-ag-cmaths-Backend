@@ -111,6 +111,11 @@ app.use("/add-payment", addPaymentRoutes);
 const getPaymentsRoutes = require("./routes/payments/get-payments");
 app.use("/get-payments", getPaymentsRoutes);
 
+const addBatchRoutes = require("./routes/batches/add-batches");
+app.use("/add-batch", addBatchRoutes);
+
+const getBatchesRoutes = require("./routes/batches/get-batches");
+app.use("/get-batches", getBatchesRoutes);
 
 //to auto run back
 // Keep-alive endpoint for Render or UptimeRobot
