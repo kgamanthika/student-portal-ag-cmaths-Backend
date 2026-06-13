@@ -1,5 +1,6 @@
 const express = require("express");
 const Marks = require("../models/Marks");
+const User = require("../models/User");
 const verifyToken = require("../middleware/auth");
 
 const router = express.Router();
@@ -19,14 +20,55 @@ router.post("/add", verifyToken, async (req, res) => {
 });
 
 // Get all marks (optional: for admin view)
-router.get("/",verifyToken, async (req, res) => {
-  if (!["admin", "system-owner","student"].includes(req.user.role)) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
+// router.get("/",verifyToken, async (req, res) => {
+//   if (!["admin", "system-owner","student"].includes(req.user.role)) {
+//     return res.status(403).json({ message: "Forbidden" });
+//   }
+//   try {
+//     const data = await Marks.find();
+//     res.json(data);
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to fetch marks" });
+//   }
+// });
+router.get("/", verifyToken, async (req, res) => {
   try {
-    const data = await Marks.find();
-    res.json(data);
+
+    // Admin can see everything
+    if (["admin", "system-owner"].includes(req.user.role)) {
+      const data = await Marks.find();
+      return res.json(data);
+    }
+
+    // Student
+    if (req.user.role === "student") {
+
+      const currentStudent = await User.findById(req.user.id);
+
+      if (!currentStudent) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+
+      const classStudents = await User.find({
+        role: "student",
+        studentClass: {
+          $in: currentStudent.studentClass
+        }
+      });
+
+      const studentIds = classStudents.map(s => s.studentId);
+
+      const marks = await Marks.find({
+        studentId: { $in: studentIds }
+      });
+
+      return res.json(marks);
+    }
+
+    return res.status(403).json({ message: "Forbidden" });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Failed to fetch marks" });
   }
 });
