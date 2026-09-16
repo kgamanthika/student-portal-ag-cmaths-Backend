@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
+const Payment = require("../models/Payment");
 const bcrypt = require("bcryptjs");
 const verifyToken = require("../middleware/auth");
 
@@ -81,13 +82,58 @@ router.get("/students", verifyToken, async (req, res) => {
 });
 
 // Delete Student
+// Delete Student
 router.delete("/student/:id", verifyToken, async (req, res) => {
   if (!["admin", "system-owner"].includes(req.user.role)) {
     return res.status(403).json({ error: "Forbidden" });
   }
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ message: "Student deleted" });
+
+  try {
+    const studentId = req.params.id;
+
+    // 1. Check if student exists
+    const student = await User.findOne({
+      _id: studentId,
+      role: "student",
+    });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    // 2. Delete all payments belonging to this student
+    const deletedPayments = await Payment.deleteMany({
+      studentId: studentId,
+    });
+
+    // 3. Delete the student
+    await User.findByIdAndDelete(studentId);
+
+    res.json({
+      success: true,
+      message: "Student and related payments deleted successfully",
+      deletedPayments: deletedPayments.deletedCount,
+    });
+  } catch (error) {
+    console.error("Delete Student Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
 });
+// router.delete("/student/:id", verifyToken, async (req, res) => {
+//   if (!["admin", "system-owner"].includes(req.user.role)) {
+//     return res.status(403).json({ error: "Forbidden" });
+//   }
+//   await User.findByIdAndDelete(req.params.id);
+//   res.json({ message: "Student deleted" });
+// });
 
 // Update Student
 // Update Student (including optional password)
