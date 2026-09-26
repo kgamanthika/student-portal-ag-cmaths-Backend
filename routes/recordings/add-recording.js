@@ -12,6 +12,7 @@ router.post("/:lessonId/recordings", async (req, res) => {
       recording_title,
       recording_description = "",
       recording_watermark = "",
+      recording_enabled = true,
     } = req.body;
 
     if (!recording_Url) {
@@ -27,6 +28,7 @@ router.post("/:lessonId/recordings", async (req, res) => {
       recording_Url,
       recording_description,
       recording_watermark,
+      recording_enabled,
     });
 
     // 🔥 Fetch updated lesson with recordings

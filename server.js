@@ -84,6 +84,9 @@ app.use("/delete-lesson", deleteLessonRoutes);
 const updateLessonRoutes = require("./routes/lessons/update-lesson");
 app.use("/update-lesson", updateLessonRoutes);
 
+const updateRecordingRoutes = require("./routes/recordings/update-recording");
+app.use("/update-recording", updateRecordingRoutes);
+
 const addAssignmentRoutes = require("./routes/assignments/add-assignment");
 app.use("/add-assignment", addAssignmentRoutes);
 
