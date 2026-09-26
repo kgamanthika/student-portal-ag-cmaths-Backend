@@ -26,6 +26,11 @@ const recordingSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+    
+    recording_enabled: {
+        type: Boolean,
+        default: true,
+    },
 
     createdAt: {
     type: Date,
