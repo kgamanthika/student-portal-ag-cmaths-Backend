@@ -2,20 +2,114 @@ const express = require("express");
 const Marks = require("../models/Marks");
 const User = require("../models/User");
 const verifyToken = require("../middleware/auth");
+const User = require("../models/User");
+const sendSMS = require("../services/smsService");
 
 const router = express.Router();
 
 // Add marks
 router.post("/add", verifyToken, async (req, res) => {
   if (!["admin", "system-owner"].includes(req.user.role)) {
-    return res.status(403).json({ message: "Forbidden" });
+    return res.status(403).json({
+      message: "Forbidden"
+    });
   }
+
   try {
-    const mark = new Marks(req.body);
+    const {
+      studentId,
+      subject,
+      marks,
+      term
+    } = req.body;
+
+    // =====================================
+    // 1. FIND STUDENT
+    // =====================================
+
+    const student = await User.findOne({ studentId });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found"
+      });
+    }
+
+    // =====================================
+    // 2. SAVE MARKS
+    // =====================================
+
+    const mark = new Marks({
+      studentId,
+      subject,
+      marks,
+      term
+    });
+
     await mark.save();
-    res.json({ message: "Marks added", success: true });
+
+    // =====================================
+    // 3. CREATE SMS MESSAGE
+    // =====================================
+
+    const message =
+  `Dear ${student.name},\n\n` +
+  `ST-ID : ${student.studentId}\n` +
+  `Exam  : ${subject} PAPER-${term}\n` +
+  `Marks : ${marks}%.\n\n` +
+  `Thank you.\n` +
+  `Amesh Gamage`;
+
+    // =====================================
+    // 4. SEND SMS
+    // =====================================
+
+    let smsSent = false;
+
+    try {
+      if (student.contactNumber) {
+        await sendSMS(
+          student.contactNumber,
+          message
+        );
+
+        smsSent = true;
+
+        // console.log(
+        //   `SMS sent to ${student.contactNumber}`
+        // );
+      } else {
+        console.log(
+          `No contact number for student ${studentId}`
+        );
+      }
+    } catch (smsError) {
+      console.error(
+        "SMS sending failed:",
+        smsError
+      );
+    }
+
+    // =====================================
+    // 5. RESPONSE
+    // =====================================
+
+    res.json({
+      success: true,
+      message: smsSent
+        ? "Marks added and SMS sent successfully"
+        : "Marks added successfully, but SMS could not be sent",
+      smsSent
+    });
+
   } catch (err) {
-    res.status(500).json({ message: "Failed to add marks", success: false });
+    console.error("Add Marks Error:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to add marks"
+    });
   }
 });
 
