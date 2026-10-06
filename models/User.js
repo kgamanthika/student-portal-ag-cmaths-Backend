@@ -7,6 +7,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  contactNumber: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
   password: {
     type: String,
     required: true,
@@ -22,10 +28,10 @@ const userSchema = new mongoose.Schema({
     enum: ["Online", "Physical"],
     required: false,
   },
-  studentClass:{
+  studentClass: {
     type: [String],
     required: false,
-  }
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
