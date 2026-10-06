@@ -2,7 +2,6 @@ const express = require("express");
 const Marks = require("../models/Marks");
 const User = require("../models/User");
 const verifyToken = require("../middleware/auth");
-const User = require("../models/User");
 const sendSMS = require("../services/smsService");
 
 const router = express.Router();
