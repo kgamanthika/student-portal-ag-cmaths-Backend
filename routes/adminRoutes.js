@@ -84,7 +84,7 @@ router.post("/add-student", verifyToken, async (req, res) => {
       const message =
         `Welcome to Amesh Gamage Combined Maths Class,\n\n` +
         `Dear ${name},\n` +
-        `Your student account has been created.\n` +
+        `Your student account has been created.\n\n` +
         `Web: amg-cmaths.app \n` +
         `Email: ${email} \n` +
         `Password: ${studentId}`;
