@@ -18,15 +18,15 @@ router.get("/", verifyToken, async (req, res) => {
       
       // Check if 24-hour global window has passed
       const examStartTime = new Date(exam.startTime);
-      const examEndTime = new Date(examStartTime.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from exam start
+      const examEndTime = new Date(examStartTime.getTime() + (48 * 60 * 60 * 1000)); // 48 hours from exam start
       const now = new Date();
-      const is24hWindowPassed = now > examEndTime;
+      const is48hWindowPassed = now > examEndTime;
       
       return {
         ...exam.toObject(),
         studentStartTime: studentData?.studentStartTime || null,
         alreadySubmitted: !!studentData?.submittedAt,
-        is24hWindowPassed: is24hWindowPassed,
+        is48hWindowPassed: is48hWindowPassed,
         globalEndTime: examEndTime
       };
     });
