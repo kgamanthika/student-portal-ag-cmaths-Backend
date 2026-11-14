@@ -120,6 +120,28 @@ app.use("/add-batch", addBatchRoutes);
 const getBatchesRoutes = require("./routes/batches/get-batches");
 app.use("/get-batches", getBatchesRoutes);
 
+const addHomeworkRoutes = require("./routes/homeworks/add-homework");
+app.use("/add-homework", addHomeworkRoutes);
+
+const deleteHomeworkRoutes = require("./routes/homeworks/delete-homework");
+app.use("/delete-homework", deleteHomeworkRoutes);
+
+const getHomeworkRoutes = require("./routes/homeworks/get-homework");
+app.use("/get-homework", getHomeworkRoutes);
+
+const submitHomeworkRoutes = require("./routes/homeworks/submit-homework");
+app.use("/submit-homework", submitHomeworkRoutes);
+
+const adminAllHomeworksRoutes = require("./routes/homeworks/admin-get-all-homeworks");
+app.use("/admin/all-homeworks", adminAllHomeworksRoutes);
+
+const toggleHomeworkRoutes = require("./routes/homeworks/admin-toggle-homework");
+app.use("/admin/toggle-homework", toggleHomeworkRoutes);
+
+const studentPendingHomeworksRoutes = require("./routes/homeworks/student-pending-homeworks");
+app.use("/student-pending-homeworks", studentPendingHomeworksRoutes);
+
+
 //to auto run back
 // Keep-alive endpoint for Render or UptimeRobot
 app.get("/ping", (req, res) => {
